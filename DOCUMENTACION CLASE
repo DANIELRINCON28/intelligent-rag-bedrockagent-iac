@@ -1,0 +1,126 @@
+# Informe: Ciclo de Vida DevOps para la Implementación de un Chatbot de Recomendación en Amazon
+
+Este documento describe el ciclo de vida de desarrollo de software (SDLC) para la implementación de una nueva funcionalidad —un chatbot de recomendación de productos— en la plataforma de Amazon, utilizando un enfoque DevOps. Este modelo es fundamental en entornos de computación en la nube, ya que promueve la agilidad, la colaboración y la automatización para entregar valor de forma rápida y fiable.
+
+# Escenario del Proyecto
+## Objetivo: 
+
+Aumentar la interacción del cliente y las ventas mediante la implementación de un chatbot en la página de detalles del producto. Este chatbot ofrecerá recomendaciones personalizadas, responderá preguntas frecuentes sobre productos y guiará a los usuarios en su compra.
+
+## Pila Tecnológica (Ejemplo con AWS):
+
+- Orquestación de CI/CD: AWS CodePipeline
+
+- Control de Versiones: AWS CodeCommit (o GitHub)
+
+- Compilación y Pruebas: AWS CodeBuild
+
+- Despliegue: AWS CodeDeploy
+
+- Infraestructura como Código (IaC): AWS CloudFormation
+
+- Motor del Chatbot: Amazon Lex
+
+- Lógica de Negocio: AWS Lambda
+
+- Motor de Recomendaciones: Amazon Personalize
+
+- Monitoreo y Logs: Amazon CloudWatch y AWS X-Ray
+
+# Fases del Ciclo de Vida DevOps
+El ciclo de vida DevOps no es lineal, sino un bucle infinito de mejora continua. A continuación, se detalla cada fase aplicada a nuestro proyecto de chatbot.
+
+
+## 1. Planificación (Plan)
+
+- En esta fase inicial, el equipo de producto y los ingenieros definen el alcance y los objetivos del proyecto.
+
+- Definición de Requisitos: Se establecen las "historias de usuario". Por ejemplo: "Como cliente, quiero que un chatbot me sugiera accesorios compatibles con la cámara que estoy viendo".
+
+- Arquitectura de la Solución: Se diseña la arquitectura. El equipo decide usar Amazon Lex para procesar el lenguaje natural, una función AWS Lambda para ejecutar la lógica de negocio y Amazon Personalize para generar las recomendaciones.
+
+- Desglose de Tareas: Se crean tareas específicas en un tablero de proyectos (como Jira). Por ejemplo: "Crear el intent 'BuscarAccesorios' en Lex", "Desarrollar la función Lambda para consultar Personalize", etc.
+
+- Infraestructura como Código (IaC): Desde el inicio, se planea definir toda la infraestructura (el bot de Lex, la función Lambda, los permisos de IAM) en una plantilla de AWS CloudFormation. Esto asegura que los entornos sean idénticos y reproducibles.
+
+
+## 2. Codificación (Code)
+Los desarrolladores escriben el código para la funcionalidad del chatbot y la infraestructura.
+
+- Desarrollo de la Lógica: Se escribe el código de la función Lambda (en Python o Node.js) que se integra con las APIs internas de Amazon y Amazon Personalize.
+
+-  Definición del Chatbot: Se configuran los intents (intenciones) y slots (variables) en la definición de Amazon Lex.
+
+- Control de Versiones: Todo el código, incluyendo los scripts de la Lambda y la plantilla de CloudFormation, se sube a un repositorio centralizado como AWS CodeCommit o GitHub.
+
+
+## 3. Compilación (Build) - Integración Continua (CI)
+Esta fase se enfoca en compilar el código y los artefactos necesarios para el despliegue de forma automatizada.
+
+- Disparador Automático: Un push a la rama principal del repositorio activa automáticamente un pipeline en AWS CodePipeline.
+
+- Proceso de Build: AWS CodeBuild se encarga de:
+
+Descargar el código fuente.
+
+Ejecutar pruebas unitarias.
+
+Empaquetar la función Lambda en un archivo ZIP.
+
+Validar la sintaxis de la plantilla de CloudFormation.
+
+- Artefacto de Salida: Si el proceso es exitoso, se genera un "artefacto de compilación" que se almacena en un bucket de Amazon S3.
+
+
+## 4. Pruebas (Test) - Pruebas Continuas
+
+El artefacto se despliega en un entorno de pruebas (staging) para una validación más exhaustiva.
+
+- Despliegue Automatizado en Staging: El pipeline utiliza CloudFormation para crear una versión aislada de la infraestructura del chatbot.
+
+- Tipos de Pruebas Automatizadas:
+
+Pruebas de Integración: Se verifica que Amazon Lex se comunique correctamente con Lambda y Amazon Personalize.
+
+Pruebas de Carga: Se simula la interacción de miles de usuarios para asegurar que el chatbot escala correctamente.
+
+Análisis de Seguridad: Se escanea el código en busca de vulnerabilidades.
+
+
+## 5. Liberación (Release)
+
+Una vez superadas las pruebas, el artefacto está listo para ser promovido a producción.
+
+- Versionado: El artefacto se etiqueta con un número de versión (ej., v1.1.0) para seguimiento y reversión.
+
+- Aprobación Manual (Opcional): Se puede incluir un paso de aprobación manual en el pipeline antes del despliegue final.
+
+
+## 6. Despliegue (Deploy) - Entrega Continua (CD)
+Se lleva la nueva versión a los usuarios finales de manera controlada y segura.
+
+- Orquestación del Despliegue: AWS CodePipeline y AWS CodeDeploy gestionan el proceso.
+
+- Estrategia de Despliegue:
+
+Despliegue Canario (Canary Deployment): Se libera la nueva versión a un pequeño porcentaje de usuarios (ej., 1%) para monitorear el impacto.
+
+Incremento Gradual: Si no se detectan problemas, el tráfico se aumenta gradualmente (5%, 20%, 50%) hasta alcanzar el 100%.
+
+
+## 7. Operación y Monitoreo (Operate & Monitor)
+El ciclo no termina con el despliegue. La monitorización continua es clave.
+
+- Recolección de Métricas y Logs:
+
+Amazon CloudWatch: Captura métricas clave (invocaciones, latencia, errores) y centraliza los logs.
+
+AWS X-Ray: Permite trazar solicitudes a través del sistema para identificar cuellos de botella.
+
+- Alertas Automatizadas: Se configuran alarmas en CloudWatch que notifican al equipo si se superan ciertos umbrales de error o latencia.
+
+- Retroalimentación (Feedback Loop): La información recopilada (errores, preguntas no entendidas, etc.) se convierte en nuevas tareas para la fase de Planificación, cerrando así el ciclo.
+
+
+## Conclusión
+La implementación de un chatbot a través de un ciclo de vida DevOps garantiza que la nueva funcionalidad se entregue de manera rápida, segura y con alta calidad. La automatización reduce el error humano, la IaC asegura la consistencia y el monitoreo continuo permite una mejora iterativa constante.#
